@@ -1,0 +1,108 @@
+﻿@page "/auth"
+
+<h3>Authentification</h3>
+
+<div style="display:flex; gap:50px;">
+    <!-- Inscription -->
+    <div style="flex:1; border:1px solid gray; padding:15px;">
+        <h4>Inscription</h4>
+        <input @bind="registerModel.FirstName" placeholder="Prénom" /><br />
+        <input @bind="registerModel.LastName" placeholder="Nom" /><br />
+        <input @bind="registerModel.Email" placeholder="Email" /><br />
+        <input @bind="registerModel.Username" placeholder="Username" /><br />
+        <input type="password" @bind="registerModel.Password" placeholder="Password" /><br />
+        <button @onclick="Register">S'inscrire</button>
+    </div>
+
+    <!-- Connexion -->
+    <div style="flex:1; border:1px solid gray; padding:15px;">
+        <h4>Connexion</h4>
+        <input @bind="loginModel.Username" placeholder="Username" /><br />
+        <input type="password" @bind="loginModel.Password" placeholder="Password" /><br />
+        <button @onclick="Login">Se connecter</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p style="color:red">@message</p>
+}
+
+@code {
+    private RegisterModel registerModel = new();
+    private LoginModel loginModel = new();
+    private string message = "";
+
+    // simulation d'une "base"
+    private static List<User> users = new();
+
+    private void Register()
+    {
+        if (users.Any(u => u.Username == registerModel.Username))
+        {
+            message = "⚠️ Username déjà pris.";
+            return;
+        }
+
+        var newUser = new User
+        {
+            FirstName = registerModel.FirstName,
+            LastName = registerModel.LastName,
+            Email = registerModel.Email,
+            Username = registerModel.Username,
+            PasswordHash = ComputeSha256Hash(registerModel.Password)
+        };
+
+        users.Add(newUser);
+        message = "✅ Inscription réussie !";
+    }
+
+    private void Login()
+    {
+        var hashed = ComputeSha256Hash(loginModel.Password);
+        var user = users.FirstOrDefault(u => u.Username == loginModel.Username && u.PasswordHash == hashed);
+
+        if (user == null)
+        {
+            message = "❌ Mauvais identifiants.";
+        }
+        else
+        {
+            message = "";
+            Navigation.NavigateTo("/hello");
+        }
+    }
+
+    [Inject] private NavigationManager Navigation { get; set; }
+
+    private static string ComputeSha256Hash(string rawData)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
+        return Convert.ToHexString(bytes); // exemple: "A9F5..."
+    }
+
+    class RegisterModel
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    class LoginModel
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    class User
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string PasswordHash { get; set; } = "";
+    }
+}

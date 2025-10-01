@@ -1,0 +1,88 @@
+﻿@using Microsoft.EntityFrameworkCore
+
+
+@inject Loris_Blazor.Data.DBContext Db
+@page "/register"
+
+<h3>Register</h3>
+<div style="display:flex; gap:50px;">
+    <!-- Inscription -->
+    <div style="flex:1; border:1px solid gray; padding:15px;">
+        <h4>Inscription</h4>
+        <input @bind="registerModel.FirstName" placeholder="Prénom" /><br />
+        <input @bind="registerModel.LastName" placeholder="Nom" /><br />
+        <input @bind="registerModel.Email" placeholder="Email" /><br />
+        <input @bind="registerModel.Username" placeholder="Username" /><br />
+        <input type="password" @bind="registerModel.Password" placeholder="Password" /><br />
+        <button @onclick="Registeration">S'inscrire</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p style="color:red">@message</p>
+}
+
+@code 
+{
+    private RegisterModel registerModel = new();
+    private string message = "";
+
+    private async Task Registeration()
+    {
+        try
+        {
+            // Vérifie si username déjà existant
+            if (await Db.Users.AnyAsync(u => u.Username == registerModel.Username))
+            {
+                message = "⚠️ Username déjà pris.";
+                return;
+            }
+
+            var newUser = new Loris_Blazor.Models.User
+            {
+                Prenom = registerModel.FirstName,
+                Nom = registerModel.LastName,
+                Email = registerModel.Email,
+                Username = registerModel.Username,
+                Password = ComputeSha256Hash(registerModel.Password),
+                DateCreation = DateTime.UtcNow
+            };
+
+            Db.Users.Add(newUser);
+            await Db.SaveChangesAsync();
+
+            message = "✅ Inscription réussie !";
+        }
+        catch (Exception ex)
+        {
+            message = $"❌ Erreur : {ex.Message}";
+
+            if (ex.InnerException != null)
+            {
+                message += $" | Détail : {ex.InnerException.Message}";
+            }
+
+            Console.WriteLine(ex); // trace complète
+        }
+
+    }
+
+
+    private static string ComputeSha256Hash(string rawData)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
+        return Convert.ToHexString(bytes); // exemple: "A9F5..."
+    }
+
+    class RegisterModel
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+}

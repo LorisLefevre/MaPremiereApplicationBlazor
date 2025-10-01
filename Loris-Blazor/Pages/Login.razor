@@ -1,0 +1,60 @@
+﻿@using Microsoft.EntityFrameworkCore;
+
+
+@inject Loris_Blazor.Data.DBContext Db
+@inject NavigationManager Navigation
+@page "/login"
+
+<h3>Login</h3>
+
+<div style="display:flex; gap:50px;">
+    <!-- Connexion -->
+    <div style="flex:1; border:1px solid gray; padding:15px;">
+        <h4>Connexion</h4>
+        <input @bind="loginModel.Username" placeholder="Username" /><br />
+        <input type="password" @bind="loginModel.Password" placeholder="Password" /><br />
+        <button @onclick="Connection">Se connecter</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p style="color:red">@message</p>
+}
+
+@code {
+    private LoginModel loginModel = new();
+    private string message = "";
+
+    private async Task Connection()
+    {
+        var hashed = ComputeSha256Hash(loginModel.Password);
+
+        // Vérifie si un user correspond en DB
+        var user = await Db.Users
+            .FirstOrDefaultAsync(u => u.Username == loginModel.Username && u.Password == hashed);
+
+        if (user == null)
+        {
+            message = "❌ Mauvais identifiants.";
+        }
+        else
+        {
+            message = "";
+            Navigation.NavigateTo("/hello");
+        }
+    }
+
+    private static string ComputeSha256Hash(string rawData)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rawData));
+        return Convert.ToHexString(bytes);
+    }
+
+    class LoginModel
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}
