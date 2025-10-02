@@ -51,3 +51,5 @@ C:\Users\Loris\source\repos\Loris-Blazor\Loris-Blazor\bin\Debug\net6.0\System.Co
 C:\Users\Loris\source\repos\Loris-Blazor\Loris-Blazor\bin\Debug\net6.0\System.Diagnostics.DiagnosticSource.dll
 C:\Users\Loris\source\repos\Loris-Blazor\Loris-Blazor\obj\Debug\net6.0\Loris-Blazor.csproj.AssemblyReference.cache
 C:\Users\Loris\source\repos\Loris-Blazor\Loris-Blazor\obj\Debug\net6.0\Loris-Bl.8C73AA3B.Up2Date
+C:\Users\Loris\source\repos\Loris-Blazor\Loris-Blazor\obj\Debug\net6.0\Loris-Blazor.sourcelink.json
+C:\Users\Loris\source\repos\Loris-Blazor\Loris-Blazor\bin\Debug\net6.0\Blazored.LocalStorage.dll

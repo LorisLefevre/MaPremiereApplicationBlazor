@@ -1,0 +1,99 @@
+﻿@inject Loris_Blazor.Data.DBContext Db
+@inject NavigationManager Navigation
+@inject AuthService Auth
+
+@using Loris_Blazor.Models
+@using Loris_Blazor.Services;
+@using Microsoft.EntityFrameworkCore
+
+
+@page "/profile"
+
+<h3>Mon Profil</h3>
+<button @onclick="UpdateProfile" style="margin-bottom:20px;">Modifer son profil</button>
+
+<p>Utilisateur connecté : @Auth.CurrentUser?.Username</p>
+
+
+@if(Auth.CurrentUser == null)
+{
+    <p>Désolé, mais nous n'avons pas trouvé votre profil dans la base de données...</p>
+}
+
+else
+{
+    <table style="border-collapse: collapse; width: 100%;">
+        <thead>
+            <tr style="border-bottom: 1px solid gray;">
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td>@Auth.CurrentUser.Nom</td>
+                <td>@Auth.CurrentUser.Prenom</td>
+                <td>@Auth.CurrentUser.Email</td>
+                <td>@Auth.CurrentUser.Username</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
+@code {
+    private User? currentUser;
+    private User editModel = new();
+    private string message = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Charger l'utilisateur depuis LocalStorage après le premier rendu
+            await Auth.LoadUserFromStorage();
+
+            if (Auth.CurrentUser == null)
+            {
+                message = "Vous devez être connecté !";
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            currentUser = Auth.CurrentUser;
+
+            // Copier pour le formulaire
+            editModel.Nom = currentUser.Nom;
+            editModel.Prenom = currentUser.Prenom;
+            editModel.Email = currentUser.Email;
+            editModel.Username = currentUser.Username;
+
+            StateHasChanged(); // force l’affichage
+        }
+    }
+
+
+    private async Task UpdateProfile()
+    {
+        if (currentUser == null) return;
+
+        try
+        {
+            currentUser.Nom = editModel.Nom;
+            currentUser.Prenom = editModel.Prenom;
+            currentUser.Email = editModel.Email;
+            currentUser.Username = editModel.Username;
+
+            Db.Users.Update(currentUser);
+            await Db.SaveChangesAsync();
+
+            message = "✅ Profil mis à jour !";
+        }
+        catch (Exception ex)
+        {
+            message = $"❌ Erreur : {ex.Message}";
+        }
+    }
+
+}

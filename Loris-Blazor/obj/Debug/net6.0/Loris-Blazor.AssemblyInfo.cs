@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Loris-Blazor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83463f0c173fd49c06f83f111ad77f42c98ba880")]
 [assembly: System.Reflection.AssemblyProductAttribute("Loris-Blazor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Loris-Blazor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

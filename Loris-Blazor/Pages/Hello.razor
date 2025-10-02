@@ -1,4 +1,82 @@
 ﻿@page "/hello"
+@inject Loris_Blazor.Data.DBContext Db
+@inject NavigationManager Navigation
+@inject AuthService Auth
+@using Loris_Blazor.Models
+@using Loris_Blazor.Services;
+@using Microsoft.EntityFrameworkCore
 
-<h3>Hello World 🎉</h3>
-<p>Bienvenue sur ta première page protégée (même si là, c'est encore très basique).</p
+<h3>Liste des utilisateurs</h3>
+<button @onclick="Logout" style="margin-bottom:20px;">Déconnexion</button>
+<button @onclick="Profile" style="margin-bottom:20px;">Mon Profil</button>
+
+
+
+
+@if (users == null)
+{
+    <p>Chargement...</p>
+}
+else if (!users.Any())
+{
+    <p>Aucun utilisateur trouvé.</p>
+}
+else
+{
+    <table style="border-collapse: collapse; width: 100%;">
+        <thead>
+            <tr style="border-bottom: 1px solid gray;">
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td>@user.Nom</td>
+                    <td>@user.Prenom</td>
+                    <td>@user.Email</td>
+                    <td>@user.Username</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<User>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // SELECT Nom, Prenom, Email, Username FROM Users
+        await Auth.LoadUserFromStorage();
+        if (Auth.CurrentUser == null)
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        users = await Db.Users
+            .Select(u => new User
+            {
+                Nom = u.Nom,
+                Prenom = u.Prenom,
+                Email = u.Email,
+                Username = u.Username
+            })
+            .ToListAsync();
+    }
+
+    private async Task Logout()
+    {
+        await Auth.Logout();
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+
+    private void Profile()
+    {
+        Navigation.NavigateTo("/profile", forceLoad: true);
+    }
+}

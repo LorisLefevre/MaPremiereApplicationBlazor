@@ -1,8 +1,10 @@
 ﻿@using Microsoft.EntityFrameworkCore;
+@using Loris_Blazor.Services;
 
 
 @inject Loris_Blazor.Data.DBContext Db
 @inject NavigationManager Navigation
+@inject AuthService Auth
 @page "/login"
 
 <h3>Login</h3>
@@ -29,8 +31,6 @@
     private async Task Connection()
     {
         var hashed = ComputeSha256Hash(loginModel.Password);
-
-        // Vérifie si un user correspond en DB
         var user = await Db.Users
             .FirstOrDefaultAsync(u => u.Username == loginModel.Username && u.Password == hashed);
 
@@ -40,7 +40,7 @@
         }
         else
         {
-            message = "";
+            Auth.Login(user); // ← Stocke l'utilisateur connecté
             Navigation.NavigateTo("/hello");
         }
     }

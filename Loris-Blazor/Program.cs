@@ -1,4 +1,6 @@
+using Blazored.LocalStorage;
 using Loris_Blazor.Data;
+using Loris_Blazor.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +15,8 @@ builder.Services.AddDbContext<DBContext>(options => options.UseMySql(connectionS
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 
